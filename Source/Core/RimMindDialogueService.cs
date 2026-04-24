@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using RimMind.Core;
 using RimMind.Core.Context;
 using RimMind.Core.Npc;
@@ -26,15 +27,18 @@ namespace RimMind.Dialogue.Core
 
         private static int _gameStartTick = -1;
 
-        private static readonly List<DialogueLogEntry> _logEntries = new List<DialogueLogEntry>();
+        private static ConcurrentBag<DialogueLogEntry> _logEntries = new ConcurrentBag<DialogueLogEntry>();
         private const int MaxLogEntries = 500;
 
-        private static readonly Dictionary<(int, int), List<int>> _dailyDialogueCounts
-            = new Dictionary<(int, int), List<int>>();
+        private static readonly ConcurrentDictionary<(int, int), List<int>> _dailyDialogueCounts
+            = new ConcurrentDictionary<(int, int), List<int>>();
         private static int _lastCountDay = -1;
 
         // 当前活跃对话对象映射（替代 DialogueSession.Recipient）
-        private static readonly Dictionary<int, int> _activeRecipients = new Dictionary<int, int>();
+        private static readonly ConcurrentDictionary<int, int> _activeRecipients = new ConcurrentDictionary<int, int>();
+
+        private static Dictionary<int, Pawn> _pawnCache = new Dictionary<int, Pawn>();
+        private static int _pawnCacheTick = -1;
 
         public static event Action? OnLogUpdated;
 
@@ -49,9 +53,9 @@ namespace RimMind.Dialogue.Core
             }
         }
 
-        public static IReadOnlyList<DialogueLogEntry> LogEntries => _logEntries;
+        public static IReadOnlyList<DialogueLogEntry> LogEntries => _logEntries.ToList();
 
-        public static void ClearLog() => _logEntries.Clear();
+        public static void ClearLog() => Interlocked.Exchange(ref _logEntries, new ConcurrentBag<DialogueLogEntry>());
 
         public static void NotifyGameLoaded()
         {
@@ -91,7 +95,7 @@ namespace RimMind.Dialogue.Core
             if (recipient != null)
                 _activeRecipients[pawn.thingIDNumber] = recipient.thingIDNumber;
             else
-                _activeRecipients.Remove(pawn.thingIDNumber);
+                _activeRecipients.TryRemove(pawn.thingIDNumber, out _);
 
             string triggerLabel = GetTriggerLabel(type);
             var npcId = $"NPC-{pawn.thingIDNumber}";
@@ -109,28 +113,29 @@ namespace RimMind.Dialogue.Core
 
             RimMindAPI.Chat(request).ContinueWith(task =>
             {
-                _pendingPawns.TryRemove(pawn.thingIDNumber, out _);
-                if (!isMonologue)
-                    _pendingDialoguePairs.TryRemove(MakePairKey(pawn.thingIDNumber, recipient!.thingIDNumber), out _);
-
-                if (task.IsFaulted || task.IsCanceled)
+                LongEventHandler.ExecuteWhenFinished(() =>
                 {
-                    Log.Warning($"[RimMind-Dialogue] Chat faulted for {pawn.Name.ToStringShort}: {task.Exception?.InnerException?.Message ?? "cancelled"}");
+                    _pendingPawns.TryRemove(pawn.thingIDNumber, out _);
                     if (!isMonologue)
+                        _pendingDialoguePairs.TryRemove(MakePairKey(pawn.thingIDNumber, recipient!.thingIDNumber), out _);
+
+                    if (task.IsFaulted || task.IsCanceled)
                     {
-                        Messages.Message(
-                            "RimMind.Dialogue.UI.FloatMenu.RequestFailed".Translate(pawn.Name.ToStringShort),
-                            MessageTypeDefOf.RejectInput, false);
+                        Log.Warning($"[RimMind-Dialogue] Chat faulted for {pawn.Name.ToStringShort}: {task.Exception?.InnerException?.Message ?? "cancelled"}");
+                        if (!isMonologue)
+                        {
+                            Messages.Message(
+                                "RimMind.Dialogue.UI.FloatMenu.RequestFailed".Translate(pawn.Name.ToStringShort),
+                                MessageTypeDefOf.RejectInput, false);
+                        }
+                        return;
                     }
-                    return;
-                }
 
-                var result = task.Result;
-                NpcResponseHandler.Handle(result, pawn, recipient, context, type);
+                    var result = task.Result;
+                    NpcResponseHandler.Handle(result, pawn, recipient, context, type);
 
-                // 清理已完成的对话对象映射，防止 _activeRecipients 堆积过期条目
-                if (isMonologue)
-                    _activeRecipients.Remove(pawn.thingIDNumber);
+                    _activeRecipients.TryRemove(pawn.thingIDNumber, out _);
+                });
             });
         }
 
@@ -196,26 +201,19 @@ namespace RimMind.Dialogue.Core
             _logEntries.Add(entry);
 
             if (_logEntries.Count > MaxLogEntries)
-                _logEntries.RemoveRange(0, _logEntries.Count - MaxLogEntries);
+            {
+                var kept = _logEntries.OrderByDescending(e => e.tick).Take(MaxLogEntries).ToList();
+                Interlocked.Exchange(ref _logEntries, new ConcurrentBag<DialogueLogEntry>(kept));
+            }
 
             OnLogUpdated?.Invoke();
-        }
-
-        public static void AddPlayerDialogueLog(Pawn pawn, string playerMessage, string replyText,
-            string? thoughtTag, string? thoughtDesc)
-        {
-            AddLogEntry(pawn, null, DialogueTriggerType.PlayerInput, playerMessage, replyText, thoughtTag, thoughtDesc);
         }
 
         public static void RecordDailyDialogue(int idA, int idB)
         {
             CleanExpiredDailyCounts();
             var key = MakePairKey(idA, idB);
-            if (!_dailyDialogueCounts.TryGetValue(key, out var ticks))
-            {
-                ticks = new List<int>();
-                _dailyDialogueCounts[key] = ticks;
-            }
+            var ticks = _dailyDialogueCounts.GetOrAdd(key, _ => new List<int>());
             ticks.Add(Find.TickManager.TicksGame);
         }
 
@@ -223,9 +221,28 @@ namespace RimMind.Dialogue.Core
         {
             if (!_activeRecipients.TryGetValue(pawn.thingIDNumber, out var recipientId))
                 return null;
-            return Find.WorldPawns?.AllPawnsAlive?.FirstOrDefault(p => p.thingIDNumber == recipientId)
-                ?? Find.Maps.SelectMany(m => m.mapPawns?.AllPawns ?? Enumerable.Empty<Pawn>())
-                    .FirstOrDefault(p => p.thingIDNumber == recipientId);
+
+            int now = Find.TickManager.TicksGame;
+            if (_pawnCacheTick < 0 || now - _pawnCacheTick >= 600)
+            {
+                _pawnCache.Clear();
+                foreach (var map in Find.Maps)
+                {
+                    if (map.mapPawns != null)
+                    {
+                        foreach (var p in map.mapPawns.AllPawns)
+                            _pawnCache[p.thingIDNumber] = p;
+                    }
+                }
+                if (Find.WorldPawns?.AllPawnsAlive != null)
+                {
+                    foreach (var p in Find.WorldPawns.AllPawnsAlive)
+                        _pawnCache[p.thingIDNumber] = p;
+                }
+                _pawnCacheTick = now;
+            }
+
+            return _pawnCache.TryGetValue(recipientId, out var cached) ? cached : null;
         }
 
         public static void SetActiveRecipient(Pawn pawn, Pawn? recipient)
@@ -233,7 +250,7 @@ namespace RimMind.Dialogue.Core
             if (recipient != null)
                 _activeRecipients[pawn.thingIDNumber] = recipient.thingIDNumber;
             else
-                _activeRecipients.Remove(pawn.thingIDNumber);
+                _activeRecipients.TryRemove(pawn.thingIDNumber, out _);
         }
 
         // ── 查询方法 ──
@@ -265,19 +282,6 @@ namespace RimMind.Dialogue.Core
                 return DialogueCategory.NonColonistDialogue;
 
             return DialogueCategory.ColonistDialogue;
-        }
-
-        public static List<DialogueLogEntry> GetDialogueHistory(int pawnIdA, int pawnIdB, int maxRounds)
-        {
-            var pairKey = MakePairKey(pawnIdA, pawnIdB);
-            var entries = _logEntries
-                .Where(e => !e.IsMonologue && MakePairKey(e.initiatorId, e.recipientId) == pairKey)
-                .ToList();
-
-            if (maxRounds < 0) return entries;
-
-            int take = Math.Min(maxRounds, entries.Count);
-            return entries.TakeLast(take).ToList();
         }
 
         // ── 内部方法 ──

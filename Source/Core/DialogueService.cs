@@ -28,30 +28,32 @@ namespace RimMind.Dialogue.Core
 
             RimMindAPI.Chat(request).ContinueWith(task =>
             {
-                if (task.IsFaulted || task.IsCanceled)
+                LongEventHandler.ExecuteWhenFinished(() =>
                 {
-                    onError(task.Exception?.InnerException?.Message ?? "Chat cancelled");
-                    return;
-                }
+                    if (task.IsFaulted || task.IsCanceled)
+                    {
+                        onError(task.Exception?.InnerException?.Message ?? "Chat cancelled");
+                        return;
+                    }
 
-                var result = task.Result;
-                if (result == null || !string.IsNullOrEmpty(result.Error))
-                {
-                    onError(result?.Error ?? "null result");
-                    return;
-                }
+                    var result = task.Result;
+                    if (result == null || !string.IsNullOrEmpty(result.Error))
+                    {
+                        onError(result?.Error ?? "null result");
+                        return;
+                    }
 
-                string replyText = result.Message ?? string.Empty;
-                if (replyText.NullOrEmpty())
-                {
-                    onError("Empty reply");
-                    return;
-                }
+                    string replyText = result.Message ?? string.Empty;
+                    if (replyText.NullOrEmpty())
+                    {
+                        onError("Empty reply");
+                        return;
+                    }
 
-                // 通过 NpcResponseHandler 统一处理
-                NpcResponseHandler.Handle(result, pawn, null, playerMessage, DialogueTriggerType.PlayerInput);
+                    NpcResponseHandler.Handle(result, pawn, null, playerMessage, DialogueTriggerType.PlayerInput);
 
-                onReply(replyText);
+                    onReply(replyText);
+                });
             });
         }
     }

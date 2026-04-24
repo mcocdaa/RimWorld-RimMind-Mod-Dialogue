@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Newtonsoft.Json;
 using RimMind.Core.Npc;
 using RimMind.Dialogue.Settings;
@@ -9,11 +10,9 @@ using Verse;
 
 namespace RimMind.Dialogue.Core
 {
-    /// <summary>
-    /// 统一处理 NpcChatResult 的响应逻辑，自动对话和玩家对话共用
-    /// </summary>
     public static class NpcResponseHandler
     {
+        private static readonly Dictionary<string, MethodInfo> _commandCache = new Dictionary<string, MethodInfo>();
         public static void Handle(NpcChatResult result, Pawn pawn, Pawn? recipient,
             string context, DialogueTriggerType type)
         {
@@ -130,19 +129,27 @@ namespace RimMind.Dialogue.Core
 
         private static void ExecuteCommand(NpcCommandResult cmd, Pawn pawn, Pawn? recipient)
         {
-            // 预留：通过反射调用 RimMindActionsAPI.Execute（Actions 模组可选）
             if (!Verse.ModsConfig.IsActive("mcocdaa.RimMindActions")) return;
 
             try
             {
-                var type = System.Type.GetType("RimMind.Actions.RimMindActionsAPI, RimMindActions");
-                if (type == null) return;
+                if (!_commandCache.TryGetValue(cmd.Name, out var method))
+                {
+                    var type = System.Type.GetType("RimMind.Actions.RimMindActionsAPI, RimMindActions");
+                    if (type == null)
+                    {
+                        _commandCache[cmd.Name] = null;
+                        return;
+                    }
 
-                var method = type.GetMethod("Execute",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
-                    null,
-                    new[] { typeof(string), typeof(Pawn), typeof(Pawn), typeof(string) },
-                    null);
+                    method = type.GetMethod("Execute",
+                        BindingFlags.Public | BindingFlags.Static,
+                        null,
+                        new[] { typeof(string), typeof(Pawn), typeof(Pawn), typeof(string) },
+                        null);
+                    _commandCache[cmd.Name] = method;
+                }
+
                 method?.Invoke(null, new object?[] { cmd.Name, pawn, recipient, cmd.Arguments });
             }
             catch (Exception ex)
