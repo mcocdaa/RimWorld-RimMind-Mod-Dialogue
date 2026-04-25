@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
 using RimMind.Core;
+using RimMind.Core.Context;
 using RimMind.Dialogue.Core;
 using RimMind.Dialogue.Settings;
 using Verse;
@@ -90,6 +92,13 @@ namespace RimMind.Dialogue
 
                 return sb.ToString().TrimEnd();
             });
+
+            ContextKeyRegistry.Register("dialogue_task", ContextLayer.L0_Static, 0.95f,
+                pawn =>
+                {
+                    if (ContextKeyRegistry.CurrentScenario != ScenarioIds.Dialogue) return new List<ContextEntry>();
+                    return new List<ContextEntry> { new ContextEntry("RimMind.Dialogue.Prompt.TaskInstruction".Translate()) };
+                }, "RimMind.Dialogue");
         }
 
         public override string SettingsCategory() => "RimMind - Dialogue";

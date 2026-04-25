@@ -138,7 +138,7 @@ namespace RimMind.Dialogue.Core
                     var type = System.Type.GetType("RimMind.Actions.RimMindActionsAPI, RimMindActions");
                     if (type == null)
                     {
-                        _commandCache[cmd.Name] = null;
+                        _commandCache[cmd.Name] = null!;
                         return;
                     }
 

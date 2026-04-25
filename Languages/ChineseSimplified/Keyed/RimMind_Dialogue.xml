@@ -120,4 +120,6 @@
   <RimMind.Dialogue.Debug.HediffContext>刚刚受到了伤害</RimMind.Dialogue.Debug.HediffContext>
   <RimMind.Dialogue.Relation.Positive>与 {0} 的愉快交流</RimMind.Dialogue.Relation.Positive>
   <RimMind.Dialogue.Relation.Negative>与 {0} 的不快交流</RimMind.Dialogue.Relation.Negative>
+  <RimMind.Dialogue.Prompt.TaskInstruction>你正在扮演这名殖民者。根据你的性格、当前状态和周围环境，以角色的身份做出回应。\n\n输出格式：必须返回 JSON，格式为 {"message":"你的回复内容"}\n\n你可以使用以下命令来表达情感或改变关系：\n- 在回复中嵌入 [CMD:express_emotion:{"emotion":"情感","intensity":"0.5"}] 表达情感\n- 在回复中嵌入 [CMD:change_relationship:{"target_name":"对方名字","delta":"0.1"}] 改变关系\n\n行为约束：\n- 考虑你的性格特质和当前心情来决定回应方式\n- 回复应简短自然，符合当前情境</RimMind.Dialogue.Prompt.TaskInstruction>
+  <RimMind.Dialogue.Prompt.AutoTrigger>请根据你当前的状态和周围环境，自然地做出回应。</RimMind.Dialogue.Prompt.AutoTrigger>
 </LanguageData>

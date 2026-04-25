@@ -106,7 +106,9 @@ namespace RimMind.Dialogue.Core
             {
                 NpcId = npcId,
                 Scenario = ScenarioIds.Dialogue,
-                CurrentQuery = context,
+                CurrentQuery = type == DialogueTriggerType.PlayerInput
+                    ? context
+                    : "RimMind.Dialogue.Prompt.AutoTrigger".Translate(),
                 MaxTokens = 200,
                 Temperature = 0.8f,
             };
