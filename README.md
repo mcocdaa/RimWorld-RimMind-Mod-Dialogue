@@ -51,8 +51,6 @@ cd RimWorld-RimMind-Mod-Dialogue
 3. 安装 RimMind-Dialogue
 4. 在模组管理器中确保加载顺序：Harmony → Core → Dialogue
 
-<!-- ![安装步骤](images/install-steps.png) -->
-
 ## 快速开始
 
 ### 填写 API Key
@@ -68,14 +66,6 @@ cd RimWorld-RimMind-Mod-Dialogue
 - **自动对话**：殖民者受伤、技能升级、心情变化时会自动生成内心独白
 - **主动对话**：右键点击其他殖民者，选择"对话"选项；或点击殖民者身上的 Gizmo 按钮
 - **对话浮窗**：屏幕角落实时显示最近对话
-
-<!-- ![对话窗口](images/screenshot-dialogue-window.png) -->
-
-## 截图展示
-
-<!-- ![对话浮窗](images/screenshot-dialogue-overlay.png) -->
-<!-- ![对话日志](images/screenshot-dialogue-log.png) -->
-<!-- ![Thought注入](images/screenshot-dialogue-thought.png) -->
 
 ## 核心功能
 
@@ -145,16 +135,12 @@ cd RimWorld-RimMind-Mod-Dialogue
 | 玩家主动对话 | 开启 | Gizmo 按钮 + 右键菜单对话选项 |
 | 独白冷却 | 10 游戏小时 | 同一小人同类型独白的最小间隔 |
 | 每日每对最大对话轮数 | 6 | 每对殖民者每天最多对话轮数 |
-| 对话上下文轮数 | 5 | 发送给 AI 的历史对话轮数（-1=全部） |
 | 启用对话回复 | 开启 | 收到对话后自动生成回复 |
 | 游戏开始延迟 | 10 秒 | 加载存档后暂不触发对话 |
-| 自定义对话 Prompt | 空 | 追加在系统 Prompt 末尾 |
 | 注入 Thought 时显示通知 | 关闭 | 注入心情 Thought 时屏幕通知 |
 | 显示对话浮窗 | 开启 | 屏幕角落实时对话 |
 | 浮窗透明度 | 75% | 浮窗不透明度 |
 | 浮窗最大消息数 | 8 | 浮窗同时显示的最大对话条数 |
-| 独白请求过期 | 0.25 游戏天 | 独白请求超时自动取消 |
-| 对话请求过期 | 1 游戏天 | 对话请求超时自动取消 |
 
 ## 常见问题
 
