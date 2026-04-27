@@ -168,7 +168,7 @@ public static class DialogueService
 
 内部使用 `RimMindAPI.Chat`，ContinueWith 回调通过 `LongEventHandler.ExecuteWhenFinished` 调度到主线程，然后调用 `NpcResponseHandler.Handle` + `onReply`/`onError` 委托。
 
-⚠️ 已知问题：`RequestReply` 当前硬编码 `recipient=null`，导致玩家对话被当作独白处理。详见 `docs/06-problem/RimMind-Dialogue.md` #1。
+⚠️ 已知问题：Gizmo 按钮发起的对话中 `initiator=null`，导致 `NpcResponseHandler.Handle` 将玩家对话当作独白处理。FloatMenu 路径已修复（传入 `initiator`）。详见 `docs/06-problem/RimMind-Dialogue.md` #1。
 
 ### MemoryBridge
 
@@ -374,7 +374,7 @@ overlayX/Y/W/H = 20/20/420/220;     // 浮窗位置和大小
 
 任务指令翻译键通过 `TaskInstructionBuilder.Build(keyPrefix, subKeys)` 构建，自动拼接 `{keyPrefix}.{subKey}` 并 `.Translate()`。
 
-**注意**：翻译文件中仍有 13 个 `RimMind.Dialogue.Prompt.*` 翻译键无代码引用（Role.*、System.RecipientRole、Context.*），可能是预留的或废弃的。详见 `docs/06-problem/RimMind-Dialogue.md` #4。
+**注意**：翻译文件中仍有 3 个 `RimMind.Dialogue.Prompt.*` 翻译键无代码引用（System.RecipientRole、Context.DialogueHistory、Context.HistoryCompressed），可能是预留的或废弃的。详见 `docs/06-problem/RimMind-Dialogue.md` #4。
 
 ## 扩展指南
 
@@ -442,4 +442,5 @@ Dev 菜单（需开启开发模式）→ RimMind-Dialogue：
 6. **MemoryBridge**：通过反射松耦合调用 RimMindMemory，不产生编译期依赖；反射失败时静默跳过；调用方额外检查 `ModsConfig.IsActive("mcocdaa.RimMindMemory")`。
 7. **版本兼容**：FloatMenuPatch 使用 `#if V1_5` / `#else` 条件编译适配 1.5/1.6 API 差异。
 8. **日志上限**：_logEntries（ConcurrentBag）上限 500 条，超出时重建。
-9. **已知问题**：`DialogueService.RequestReply` 硬编码 `recipient=null`，导致玩家对话丢失关系变化和记忆记录。详见 `docs/06-problem/RimMind-Dialogue.md` #1。
+9. **已知问题**：Gizmo 按钮发起的玩家对话中 `initiator=null`，导致 `NpcResponseHandler.Handle` 将其当作独白处理。FloatMenu 路径已修复。详见 `docs/06-problem/RimMind-Dialogue.md` #1。
+10. **上下文格式化**：`HandleTrigger` 中根据 `DialogueTriggerType` 使用翻译键格式化 context（Context.Chitchat/Hediff/LevelUp/Thought/Auto），并通过 `GetRecipientRoleKey` 添加角色约束（Role.Prisoner/Slave/Enemy/Visitor + Context.Recipient）。PlayerInput 路径不格式化，直接使用原始 context。
