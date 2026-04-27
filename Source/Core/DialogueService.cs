@@ -51,7 +51,7 @@ namespace RimMind.Dialogue.Core
                         return;
                     }
 
-                    NpcResponseHandler.Handle(result, pawn, null, playerMessage, DialogueTriggerType.PlayerInput);
+                    NpcResponseHandler.Handle(result, pawn, initiator, playerMessage, DialogueTriggerType.PlayerInput);
 
                     onReply(replyText);
                 });

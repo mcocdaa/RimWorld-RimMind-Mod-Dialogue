@@ -91,7 +91,6 @@ namespace RimMind.Dialogue.Core
             CleanExpiredTriggers();
             _recentTriggers.Add((Find.TickManager.TicksGame, pawn.thingIDNumber, type));
 
-            // 记录当前对话对象
             if (recipient != null)
                 _activeRecipients[pawn.thingIDNumber] = recipient.thingIDNumber;
             else
@@ -100,14 +99,32 @@ namespace RimMind.Dialogue.Core
             string triggerLabel = GetTriggerLabel(type);
             var npcId = $"NPC-{pawn.thingIDNumber}";
 
-            Log.Message($"[RimMind-Dialogue] Trigger: {pawn.Name.ToStringShort} | Reason: {triggerLabel} | Context: {context}");
+            string formattedContext = type switch
+            {
+                DialogueTriggerType.Chitchat => "RimMind.Dialogue.Prompt.Context.Chitchat".Translate(context),
+                DialogueTriggerType.Hediff => "RimMind.Dialogue.Prompt.Context.Hediff".Translate(context),
+                DialogueTriggerType.LevelUp => "RimMind.Dialogue.Prompt.Context.LevelUp".Translate(context),
+                DialogueTriggerType.Thought => "RimMind.Dialogue.Prompt.Context.Thought".Translate(context),
+                DialogueTriggerType.Auto => "RimMind.Dialogue.Prompt.Context.Auto".Translate(context),
+                DialogueTriggerType.PlayerInput => context,
+                _ => context
+            };
+
+            if (recipient != null)
+            {
+                string? roleKey = GetRecipientRoleKey(recipient);
+                if (roleKey != null)
+                    formattedContext += "\n" + "RimMind.Dialogue.Prompt.Context.Recipient".Translate(recipient.Name.ToStringShort) + "\n" + roleKey.Translate();
+            }
+
+            Log.Message($"[RimMind-Dialogue] Trigger: {pawn.Name.ToStringShort} | Reason: {triggerLabel} | Context: {formattedContext}");
 
             var request = new ContextRequest
             {
                 NpcId = npcId,
                 Scenario = ScenarioIds.Dialogue,
                 CurrentQuery = type == DialogueTriggerType.PlayerInput
-                    ? context
+                    ? formattedContext
                     : "RimMind.Dialogue.Prompt.AutoTrigger".Translate(),
                 MaxTokens = 400,
                 Temperature = 0.8f,
@@ -135,7 +152,7 @@ namespace RimMind.Dialogue.Core
                     }
 
                     var result = task.Result;
-                    NpcResponseHandler.Handle(result, pawn, recipient, context, type);
+                    NpcResponseHandler.Handle(result, pawn, recipient, formattedContext, type);
 
                     _activeRecipients.TryRemove(pawn.thingIDNumber, out _);
                 });
@@ -334,6 +351,19 @@ namespace RimMind.Dialogue.Core
             int maxCooldown = RimMindDialogueSettings.Get().monologueCooldownTicks;
             int now = Find.TickManager.TicksGame;
             _recentTriggers.RemoveAll(e => now - e.tick >= maxCooldown);
+        }
+
+        private static string? GetRecipientRoleKey(Pawn recipient)
+        {
+            if (recipient.IsPrisoner)
+                return "RimMind.Dialogue.Prompt.Role.Prisoner";
+            if (recipient.IsSlave)
+                return "RimMind.Dialogue.Prompt.Role.Slave";
+            if (recipient.Faction?.HostileTo(Faction.OfPlayer) == true)
+                return "RimMind.Dialogue.Prompt.Role.Enemy";
+            if (!recipient.IsColonist)
+                return "RimMind.Dialogue.Prompt.Role.Visitor";
+            return null;
         }
     }
 

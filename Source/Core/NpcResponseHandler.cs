@@ -57,7 +57,7 @@ namespace RimMind.Dialogue.Core
                                 thoughtTag = args?.GetValueOrDefault("emotion");
                                 thoughtDesc = replyText;
                             }
-                            catch { }
+                            catch (Exception ex) { Log.Warning($"[RimMind] NpcResponseHandler express_emotion parse failed: {ex.Message}"); }
                             break;
                         case "change_relationship":
                             if (recipient != null)
@@ -71,7 +71,7 @@ namespace RimMind.Dialogue.Core
                                             ThoughtInjector.InjectRelationDelta(pawn, recipient, delta);
                                     }
                                 }
-                                catch { }
+                                catch (Exception ex) { Log.Warning($"[RimMind] NpcResponseHandler change_relationship parse failed: {ex.Message}"); }
                             }
                             break;
                         default:
