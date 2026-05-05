@@ -101,7 +101,7 @@ namespace RimMind.Dialogue
                 {
                     if (ContextKeyRegistry.CurrentScenario != ScenarioIds.Dialogue) return new List<ContextEntry>();
                     if (!string.IsNullOrEmpty(ContextKeyRegistry.CurrentSpeakerName)) return new List<ContextEntry>();
-                    bool isMonologue = string.IsNullOrEmpty(ContextKeyRegistry.CurrentSpeakerName);
+                    bool isMonologue = ContextKeyRegistry.CurrentIsMonologue;
                     var subKeys = new List<string> { "Role", "Process", "Constraint", "Fallback", "ThoughtRules" };
                     subKeys.Add(isMonologue ? "GoalMonologue" : "GoalDialogue");
                     subKeys.Add(isMonologue ? "ExampleMonologue" : "ExampleDialogue");

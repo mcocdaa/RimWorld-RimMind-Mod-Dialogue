@@ -126,7 +126,6 @@
   <RimMind.Dialogue.Relation.Positive>与 {0} 的愉快交流</RimMind.Dialogue.Relation.Positive>
   <RimMind.Dialogue.Relation.Negative>与 {0} 的不快交流</RimMind.Dialogue.Relation.Negative>
   <RimMind.Dialogue.Prompt.TaskInstruction.Role>你正在扮演 RimWorld 殖民者，根据当前状态生成自然的对话或独白。</RimMind.Dialogue.Prompt.TaskInstruction.Role>
-  <RimMind.Dialogue.Prompt.TaskInstruction.Goal>根据当前状态用第一人称进行回应。</RimMind.Dialogue.Prompt.TaskInstruction.Goal>
   <RimMind.Dialogue.Prompt.TaskInstruction.GoalDialogue>根据当前状态用第一人称说出对话（15~40字）。</RimMind.Dialogue.Prompt.TaskInstruction.GoalDialogue>
   <RimMind.Dialogue.Prompt.TaskInstruction.GoalMonologue>根据当前状态用第一人称说出一句内心独白（15~40字）。</RimMind.Dialogue.Prompt.TaskInstruction.GoalMonologue>
   <RimMind.Dialogue.Prompt.TaskInstruction.Process>1. 感知当前状态（心情、健康、环境）
@@ -134,16 +133,7 @@
 3. 生成符合角色性格的对话/独白
 4. 评估对话对情绪的影响</RimMind.Dialogue.Prompt.TaskInstruction.Process>
   <RimMind.Dialogue.Prompt.TaskInstruction.Constraint>保持角色一致性；不要打破第四面墙；对话15~40字，独白15~40字</RimMind.Dialogue.Prompt.TaskInstruction.Constraint>
-  <RimMind.Dialogue.Prompt.TaskInstruction.Example>独白输入：小人心情35%，正在采矿
-独白输出：{"reply":"这矿洞真冷……不知道还要挖多久。","thought":{"tag":"STRESSED","description":"对繁重劳动感到疲惫"}}
-对话输入：与Alex闲聊
-对话输出：{"reply":"Alex，你今天看起来心情不错？","thought":{"tag":"CONNECTED","description":"想与同伴亲近"},"relation_delta":1}</RimMind.Dialogue.Prompt.TaskInstruction.Example>
-  <RimMind.Dialogue.Prompt.TaskInstruction.Output>只返回以下 JSON 格式：
-独白：{"reply":"独白文本","thought":{"tag":"ENCOURAGED|HURT|VALUED|CONNECTED|STRESSED|IRRITATED|NONE","description":"≤15字"}}
-对话：{"reply":"对话文本","thought":{"tag":"ENCOURAGED|HURT|VALUED|CONNECTED|STRESSED|IRRITATED|NONE","description":"≤15字"},"relation_delta":0}</RimMind.Dialogue.Prompt.TaskInstruction.Output>
   <RimMind.Dialogue.Prompt.TaskInstruction.Fallback>如果无法生成，返回 {"reply":"...","thought":{"tag":"NONE","description":"无特殊情绪"}}。</RimMind.Dialogue.Prompt.TaskInstruction.Fallback>
-  <RimMind.Dialogue.Prompt.TaskInstruction.JsonTemplate>{"reply": "对话/独白文本", "thought": {"tag": "ENCOURAGED|HURT|VALUED|CONNECTED|STRESSED|IRRITATED|NONE", "description": "≤15字"}, "relation_delta": 0}</RimMind.Dialogue.Prompt.TaskInstruction.JsonTemplate>
-  <RimMind.Dialogue.Prompt.TaskInstruction.TriggerReason>触发原因已在上下文中提供。</RimMind.Dialogue.Prompt.TaskInstruction.TriggerReason>
   <RimMind.Dialogue.Prompt.TaskInstruction.RelationDelta>你可以通过 relation_delta 字段改变对话双方的好感度。范围 -5 到 +5，正值提升好感，负值降低好感。根据对话内容和当前关系决定：友好对话可能+1~+3，争吵可能-2~-5。如果对话内容不涉及关系变化，不要输出此字段。</RimMind.Dialogue.Prompt.TaskInstruction.RelationDelta>
   <RimMind.Dialogue.Prompt.TaskInstruction.ExampleMonologue>独白输入：小人心情35%，正在采矿
 独白输出：{"reply":"这矿洞真冷……不知道还要挖多久。","thought":{"tag":"STRESSED","description":"对繁重劳动感到疲惫"}}</RimMind.Dialogue.Prompt.TaskInstruction.ExampleMonologue>

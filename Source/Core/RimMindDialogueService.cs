@@ -13,10 +13,6 @@ using Verse;
 
 namespace RimMind.Dialogue.Core
 {
-    public enum DialogueTriggerType { Chitchat, Hediff, LevelUp, Thought, Auto, PlayerInput }
-
-    public enum DialogueCategory { ColonistMonologue, ColonistDialogue, PlayerDialogue, NonColonistMonologue, NonColonistDialogue }
-
     public static class RimMindDialogueService
     {
         private static readonly ConcurrentDictionary<int, byte> _pendingPawns = new ConcurrentDictionary<int, byte>();
@@ -112,7 +108,7 @@ namespace RimMind.Dialogue.Core
 
             if (!isMonologue)
             {
-                var pairKey = MakePairKey(pawn.thingIDNumber, recipient!.thingIDNumber);
+                var pairKey = DialogueClassifier.MakePairKey(pawn.thingIDNumber, recipient!.thingIDNumber);
                 if (_pendingDialoguePairs.ContainsKey(pairKey)) return;
             }
 
@@ -121,9 +117,16 @@ namespace RimMind.Dialogue.Core
             if (!isMonologue && !isReply && IsDailyDialogueLimitReached(pawn.thingIDNumber, recipient!.thingIDNumber))
                 return;
 
+            int globalConcurrency = RimMindDialogueSettings.Get().globalConcurrency;
+            if (_pendingPawns.Count >= globalConcurrency)
+            {
+                Log.Message($"[RimMind-Dialogue] Global concurrency limit ({globalConcurrency}) reached, skipping {pawn.LabelShort}");
+                return;
+            }
+
             _pendingPawns.TryAdd(pawn.thingIDNumber, 0);
             if (!isMonologue)
-                _pendingDialoguePairs.TryAdd(MakePairKey(pawn.thingIDNumber, recipient!.thingIDNumber), 0);
+                _pendingDialoguePairs.TryAdd(DialogueClassifier.MakePairKey(pawn.thingIDNumber, recipient!.thingIDNumber), 0);
             CleanExpiredTriggers();
             _recentTriggers.Add((Find.TickManager.TicksGame, pawn.thingIDNumber, type));
 
@@ -164,10 +167,13 @@ namespace RimMind.Dialogue.Core
                     : "RimMind.Dialogue.Prompt.AutoTrigger".Translate(),
                 MaxTokens = 400,
                 Temperature = 0.8f,
-                SpeakerName = recipient?.Name?.ToStringShort,
+                SpeakerName = type == DialogueTriggerType.PlayerInput ? recipient?.Name?.ToStringShort : null,
+                MaxRounds = RimMindDialogueSettings.Get().maxHistoryRounds,
+                IsMonologue = isMonologue,
             };
 
             ContextKeyRegistry.CurrentSpeakerName = request.SpeakerName;
+            ContextKeyRegistry.CurrentIsMonologue = isMonologue;
 
             RimMindAPI.Chat(request).ContinueWith(task =>
             {
@@ -175,7 +181,7 @@ namespace RimMind.Dialogue.Core
                 {
                     _pendingPawns.TryRemove(pawn.thingIDNumber, out _);
                     if (!isMonologue)
-                        _pendingDialoguePairs.TryRemove(MakePairKey(pawn.thingIDNumber, recipient!.thingIDNumber), out _);
+                    _pendingDialoguePairs.TryRemove(DialogueClassifier.MakePairKey(pawn.thingIDNumber, recipient!.thingIDNumber), out _);
 
                     if (task.IsFaulted || task.IsCanceled)
                     {
@@ -256,7 +262,7 @@ namespace RimMind.Dialogue.Core
                 recipientName = recipient?.Name.ToStringShort,
                 recipientId = recipient?.thingIDNumber ?? -1,
                 recipientIsColonist = recipient?.IsColonist ?? false,
-                category = GetCategory(pawn, recipient, triggerType),
+                category = DialogueClassifier.Classify(pawn.IsColonist, recipient?.IsColonist, triggerType),
                 trigger = triggerType.ToString(),
                 context = context,
                 reply = reply,
@@ -279,7 +285,7 @@ namespace RimMind.Dialogue.Core
         public static void RecordDailyDialogue(int idA, int idB)
         {
             CleanExpiredDailyCounts();
-            var key = MakePairKey(idA, idB);
+            var key = DialogueClassifier.MakePairKey(idA, idB);
             var ticks = _dailyDialogueCounts.GetOrAdd(key, _ => new List<int>());
             ticks.Add(Find.TickManager.TicksGame);
         }
@@ -325,14 +331,14 @@ namespace RimMind.Dialogue.Core
         public static int GetDailyDialogueCount(int idA, int idB)
         {
             CleanExpiredDailyCounts();
-            var key = MakePairKey(idA, idB);
+            var key = DialogueClassifier.MakePairKey(idA, idB);
             return _dailyDialogueCounts.TryGetValue(key, out var ticks) ? ticks.Count : 0;
         }
 
         public static bool IsDialoguePending(int pawnIdA, int pawnIdB)
         {
             if (_pendingPawns.ContainsKey(pawnIdA) || _pendingPawns.ContainsKey(pawnIdB)) return true;
-            return _pendingDialoguePairs.ContainsKey(MakePairKey(pawnIdA, pawnIdB));
+            return _pendingDialoguePairs.ContainsKey(DialogueClassifier.MakePairKey(pawnIdA, pawnIdB));
         }
 
         public static List<DialogueLogEntry> GetDialogueHistory(int pawnId, int maxCount = 20)
@@ -346,21 +352,7 @@ namespace RimMind.Dialogue.Core
 
         public static DialogueCategory GetCategory(Pawn initiator, Pawn? recipient, DialogueTriggerType triggerType)
         {
-            if (triggerType == DialogueTriggerType.PlayerInput)
-                return DialogueCategory.PlayerDialogue;
-
-            if (recipient == null)
-            {
-                return initiator.IsColonist ? DialogueCategory.ColonistMonologue : DialogueCategory.NonColonistMonologue;
-            }
-
-            bool initiatorColonist = initiator.IsColonist;
-            bool recipientColonist = recipient.IsColonist;
-
-            if (!initiatorColonist || !recipientColonist)
-                return DialogueCategory.NonColonistDialogue;
-
-            return DialogueCategory.ColonistDialogue;
+            return DialogueClassifier.Classify(initiator.IsColonist, recipient?.IsColonist, triggerType);
         }
 
         // ── 内部方法 ──
@@ -400,10 +392,7 @@ namespace RimMind.Dialogue.Core
             }
         }
 
-        private static (int, int) MakePairKey(int idA, int idB)
-        {
-            return idA < idB ? (idA, idB) : (idB, idA);
-        }
+
 
         private static void CleanExpiredTriggers()
         {

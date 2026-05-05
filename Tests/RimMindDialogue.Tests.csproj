@@ -13,6 +13,14 @@
     <PackageReference Include="xunit" Version="2.9.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" PrivateAssets="all" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../../RimMind-Core/Source/Client/JsonRepairHelper.cs" LinkBase="Client" />
+    <Compile Include="../Source/Core/ResponseJsonParser.cs" LinkBase="Core" />
+    <Compile Include="../Source/Core/DialogueTypes.cs" LinkBase="Core" />
+    <Compile Include="../Source/Core/DialogueClassifier.cs" LinkBase="Core" />
   </ItemGroup>
 
 </Project>
