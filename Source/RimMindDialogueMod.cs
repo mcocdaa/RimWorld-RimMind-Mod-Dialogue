@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
+using RimMind.Contracts.Extension;
 using RimMind.Core;
 using RimMind.Core.Context;
 using RimMind.Core.Prompt;
@@ -21,22 +22,11 @@ namespace RimMind.Dialogue
             new Harmony("mcocdaa.RimMindDialogueStandalone").PatchAll();
 
             RegisterContextProviders();
-            RimMindAPI.RegisterSettingsTab("dialogue", () => "RimMind.Dialogue.Settings.TabLabel".Translate(), RimMindDialogueSettings.DrawSettingsContent);
-            RimMindAPI.RegisterModCooldown("Dialogue", () => RimMindDialogueSettings.Get().monologueCooldownTicks);
-
-            RimMindAPI.RegisterToggleBehavior("dialogue_overlay",
-                () => RimMindDialogueSettings.Get().overlayEnabled,
-                () =>
-                {
-                    var s = RimMindDialogueSettings.Get();
-                    s.overlayEnabled = !s.overlayEnabled;
-                    s.Write();
-                });
-
-            RimMindAPI.RegisterDialogueTrigger((pawn, context, recipient) =>
-            {
-                RimMindDialogueService.HandleTrigger(pawn, context, DialogueTriggerType.Chitchat, recipient);
-            });
+            RimMindAPI.Extensions<ISettingsTab>().Register(new DialogueSettingsTab());
+            RimMindAPI.Extensions<IModCooldown>().Register(new DialogueModCooldown());
+            RimMindAPI.Extensions<IToggleBehavior>().Register(new DialogueOverlayToggleBehavior());
+            RimMindAPI.Extensions<IDialogueTrigger>().Register(new DialogueTriggerAdapter());
+            RimMindAPI.Extensions<ISkipCheck>().Register(new DialogueSkipCheck());
 
             Log.Message("[RimMind-Dialogue] Initialized.");
         }
