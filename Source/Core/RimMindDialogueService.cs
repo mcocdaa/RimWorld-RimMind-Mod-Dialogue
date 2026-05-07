@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using RimMind.Core;
-using RimMind.Core.Context;
+using RimMind.Kernel.Context;
 using RimMind.Core.Npc;
 using RimMind.Dialogue.Settings;
 using RimWorld;

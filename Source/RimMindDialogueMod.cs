@@ -1,11 +1,11 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
 using RimMind.Contracts.Extension;
 using RimMind.Core;
-using RimMind.Core.Context;
-using RimMind.Core.Prompt;
+using RimMind.Kernel.Context;
+using RimMind.Kernel.Prompt;
 using RimMind.Dialogue.Core;
 using RimMind.Dialogue.Settings;
 using Verse;

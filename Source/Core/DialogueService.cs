@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 using RimMind.Core;
-using RimMind.Core.Context;
+using RimMind.Kernel.Context;
 using RimMind.Core.Npc;
 using RimMind.Dialogue.Settings;
 using Verse;
