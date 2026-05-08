@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using RimMind.Contracts.Npc;
 using RimMind.Core;
 using RimMind.Kernel.Context;
 using RimMind.Core.Npc;

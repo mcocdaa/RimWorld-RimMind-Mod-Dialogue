@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using RimMind.Contracts.Npc;
 using RimMind.Core;
 using RimMind.Kernel.Context;
 using RimMind.Core.Npc;
