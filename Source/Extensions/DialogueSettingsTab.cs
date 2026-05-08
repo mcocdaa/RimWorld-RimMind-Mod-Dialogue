@@ -1,4 +1,5 @@
 using UnityEngine;
+using Verse;
 using RimMind.Contracts.Extension;
 using RimMind.Dialogue.Settings;
 
