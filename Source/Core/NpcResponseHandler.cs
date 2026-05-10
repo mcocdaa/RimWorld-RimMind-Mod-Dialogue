@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Newtonsoft.Json;
 using RimMind.Contracts.Npc;
+using RimMind.Contracts.Result;
 using RimMind.Dialogue.Settings;
 using RimWorld;
 using UnityEngine;
@@ -13,12 +14,12 @@ namespace RimMind.Dialogue.Core
     public static class NpcResponseHandler
     {
         private static readonly Dictionary<string, MethodInfo> _commandCache = new Dictionary<string, MethodInfo>();
-        public static void Handle(NpcChatResult result, Pawn pawn, Pawn? recipient,
+        public static void Handle(Result<NpcChatResult, RimMindError> result, Pawn pawn, Pawn? recipient,
             string context, DialogueTriggerType type)
         {
             if (pawn.Dead || pawn.Destroyed) return;
 
-            if (result.Error != null)
+            if (result.IsErr)
             {
                 Log.Warning($"[RimMind] NpcChat error for {pawn.LabelShort}: {result.Error}");
                 if (recipient != null)
@@ -30,7 +31,7 @@ namespace RimMind.Dialogue.Core
                 return;
             }
 
-            string replyText = result.Message ?? string.Empty;
+            string replyText = result.Value.Message ?? string.Empty;
             if (replyText.NullOrEmpty())
             {
                 Log.Warning($"[RimMind-Dialogue] Empty reply for {pawn.LabelShort}, context: {context}");
@@ -43,7 +44,7 @@ namespace RimMind.Dialogue.Core
             string? thoughtDesc = null;
             int relationDelta = 0;
 
-            ResponseJsonParser.TryParseResponseJson(result.Message, isMonologue, ref replyText, ref thoughtTag, ref thoughtDesc, ref relationDelta);
+            ResponseJsonParser.TryParseResponseJson(result.Value.Message, isMonologue, ref replyText, ref thoughtTag, ref thoughtDesc, ref relationDelta);
 
             // 显示气泡
             RimMindDialogueService.DisplayInteraction(pawn, recipient, replyText);

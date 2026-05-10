@@ -1,5 +1,6 @@
 using System;
 using RimMind.Contracts.Npc;
+using RimMind.Contracts.Result;
 using RimMind.Core;
 using RimMind.Kernel.Context;
 using RimMind.Contracts.Context;
@@ -39,13 +40,13 @@ namespace RimMind.Dialogue.Core
                     }
 
                     var result = task.Result;
-                    if (result == null || !string.IsNullOrEmpty(result.Error))
+                    if (result.IsErr)
                     {
-                        onError(result?.Error ?? "null result");
+                        onError(result.Error.ToString());
                         return;
                     }
 
-                    string replyText = result.Message ?? string.Empty;
+                    string replyText = result.Value.Message ?? string.Empty;
                     if (replyText.NullOrEmpty())
                     {
                         onError("Empty reply");
