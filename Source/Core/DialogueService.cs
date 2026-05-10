@@ -2,7 +2,7 @@ using System;
 using RimMind.Contracts.Npc;
 using RimMind.Core;
 using RimMind.Kernel.Context;
-using RimMind.Core.Npc;
+using RimMind.Contracts.Context;
 using RimMind.Dialogue.Settings;
 using Verse;
 
@@ -11,7 +11,7 @@ namespace RimMind.Dialogue.Core
     public static class DialogueService
     {
         /// <summary>
-        /// 玩家对话请求，统一走 RimMindAPI.Chat 路径
+        /// 玩家对话请求，统一�?RimMindAPI.Chat 路径
         /// </summary>
         public static void RequestReply(Pawn pawn, string playerMessage, Pawn? initiator,
             Action<string> onReply, Action<string> onError)
