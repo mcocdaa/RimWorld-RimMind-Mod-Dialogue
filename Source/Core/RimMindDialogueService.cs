@@ -34,7 +34,8 @@ namespace RimMind.Dialogue.Core
             = new ConcurrentDictionary<(int, int), List<int>>();
         private static int _lastCountDay = -1;
 
-        // 当前活跃对话对象映射（替�?DialogueSession.Recipient�?        private static readonly ConcurrentDictionary<int, int> _activeRecipients = new ConcurrentDictionary<int, int>();
+        // 当前活跃对话对象映射（替代 DialogueSession.Recipient）
+        private static readonly ConcurrentDictionary<int, int> _activeRecipients = new ConcurrentDictionary<int, int>();
 
         private static Dictionary<int, Pawn> _pawnCache = new Dictionary<int, Pawn>();
         private static int _pawnCacheTick = -1;
@@ -203,7 +204,7 @@ namespace RimMind.Dialogue.Core
             });
         }
 
-        // ── �?NpcResponseHandler 调用的公共方�?──
+        // ── 供 NpcResponseHandler 调用的公共方法 ──
 
         public static void TryTriggerReply(Pawn originalSender, Pawn replier, string originalMessage)
         {
