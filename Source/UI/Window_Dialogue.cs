@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using RimMind.Contracts.Result;
 using RimMind.Dialogue.Core;
 using RimWorld;
 using UnityEngine;
@@ -198,7 +199,7 @@ namespace RimMind.Dialogue.UI
                 {
                     _isWaiting = false;
                     _autoScroll = true;
-                    Log.Warning($"[RimMind-Dialogue] Player dialogue error: {error}");
+                    RimMindErrors.Warn($"[RimMind-Dialogue] Player dialogue error: {error}");
                     Messages.Message(
                         "RimMind.Dialogue.UI.FloatMenu.RequestFailed".Translate(_pawn.Name.ToStringShort),
                         MessageTypeDefOf.RejectInput, false);

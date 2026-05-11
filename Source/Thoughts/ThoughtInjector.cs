@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using RimMind.Contracts.Result;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -38,7 +39,7 @@ namespace RimMind.Dialogue
             var thoughtDef = DefDatabase<ThoughtDef>.GetNamedSilentFail(ThoughtDefName);
             if (thoughtDef == null)
             {
-                Log.Warning($"[RimMind-Dialogue] ThoughtDef '{ThoughtDefName}' not found.");
+                RimMindErrors.Warn($"[RimMind-Dialogue] ThoughtDef '{ThoughtDefName}' not found.");
                 return;
             }
 
@@ -79,7 +80,7 @@ namespace RimMind.Dialogue
             var thoughtDef = DefDatabase<ThoughtDef>.GetNamedSilentFail(RelationThoughtDefName);
             if (thoughtDef == null)
             {
-                Log.Warning($"[RimMind-Dialogue] ThoughtDef '{RelationThoughtDefName}' not found.");
+                RimMindErrors.Warn($"[RimMind-Dialogue] ThoughtDef '{RelationThoughtDefName}' not found.");
                 return;
             }
 

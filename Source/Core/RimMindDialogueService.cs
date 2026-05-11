@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using RimMind.Contracts.Npc;
+using RimMind.Contracts.Result;
 using RimMind.Core;
 using RimMind.Kernel.Context;
 using RimMind.Contracts.Context;
@@ -186,7 +187,7 @@ namespace RimMind.Dialogue.Core
 
                     if (task.IsFaulted || task.IsCanceled)
                     {
-                        Log.Warning($"[RimMind-Dialogue] Chat faulted for {pawn.Name.ToStringShort}: {task.Exception?.InnerException?.Message ?? "cancelled"}");
+                        RimMindErrors.Warn($"[RimMind-Dialogue] Chat faulted for {pawn.Name.ToStringShort}: {task.Exception?.InnerException?.Message ?? "cancelled"}");
                         if (!isMonologue)
                         {
                             Messages.Message(

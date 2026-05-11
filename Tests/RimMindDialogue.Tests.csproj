@@ -23,4 +23,8 @@
     <Compile Include="../Source/Core/DialogueClassifier.cs" LinkBase="Core" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../../RimMind-Core/Source/Contracts/RimMindCore.Contracts.csproj" />
+  </ItemGroup>
+
 </Project>

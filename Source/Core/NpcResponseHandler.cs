@@ -21,7 +21,7 @@ namespace RimMind.Dialogue.Core
 
             if (result.IsErr)
             {
-                Log.Warning($"[RimMind] NpcChat error for {pawn.LabelShort}: {result.Error}");
+                RimMindErrors.Warn($"[RimMind] NpcChat error for {pawn.LabelShort}: {result.Error}");
                 if (recipient != null)
                 {
                     Messages.Message(
@@ -34,7 +34,7 @@ namespace RimMind.Dialogue.Core
             string replyText = result.Value.Message ?? string.Empty;
             if (replyText.NullOrEmpty())
             {
-                Log.Warning($"[RimMind-Dialogue] Empty reply for {pawn.LabelShort}, context: {context}");
+                RimMindErrors.Warn($"[RimMind-Dialogue] Empty reply for {pawn.LabelShort}, context: {context}");
                 return;
             }
 
@@ -66,7 +66,7 @@ namespace RimMind.Dialogue.Core
                 string summary = replyText.Length > 80 ? replyText.Substring(0, 80) + "..." : replyText;
                 RimMind.Core.RimMindAPI.PublishPerception(pawn.thingIDNumber, "dialogue_completed", summary, 0.4f);
             }
-            catch (Exception ex) { Log.Warning($"[RimMind] PublishPerception dialogue_completed failed: {ex.Message}"); }
+            catch (Exception ex) { RimMindErrors.Warn($"[RimMind] PublishPerception dialogue_completed failed: {ex.Message}"); }
 
             // 记忆记录
             if (!isMonologue && recipient != null && Verse.ModsConfig.IsActive("mcocdaa.RimMindMemory"))
@@ -83,7 +83,7 @@ namespace RimMind.Dialogue.Core
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning($"[RimMind-Dialogue] Memory add failed: {ex.Message}");
+                    RimMindErrors.Warn($"[RimMind-Dialogue] Memory add failed: {ex.Message}");
                 }
             }
 
@@ -138,7 +138,7 @@ namespace RimMind.Dialogue.Core
             }
             catch (Exception ex)
             {
-                Log.Warning($"[RimMind] Failed to execute command {cmd.Name}: {ex.Message}");
+                RimMindErrors.Warn($"[RimMind] Failed to execute command {cmd.Name}: {ex.Message}");
             }
         }
     }

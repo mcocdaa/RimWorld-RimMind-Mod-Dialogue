@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using RimMind.Contracts.Result;
 using Verse;
 
 namespace RimMind.Dialogue.Core
@@ -33,7 +34,7 @@ namespace RimMind.Dialogue.Core
             }
             catch (Exception ex)
             {
-                Log.Warning($"[RimMind] TryParseResponseJson failed: {ex.Message}");
+                RimMindErrors.Warn($"[RimMind] TryParseResponseJson failed: {ex.Message}");
             }
         }
     }
