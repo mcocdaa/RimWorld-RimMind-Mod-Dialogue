@@ -35,7 +35,7 @@ namespace RimMind.Dialogue.Tests
 
             ResponseJsonParser.TryParseResponseJson(json, true, ref replyText, ref thoughtTag, ref thoughtDesc, ref relationDelta);
 
-            Assert.Equal("好累啊……", replyText);
+            Assert.Equal("好累啊…�?, replyText);
             Assert.Equal("STRESSED", thoughtTag);
             Assert.Equal("感到疲惫", thoughtDesc);
             Assert.Equal(0, relationDelta);
@@ -53,7 +53,7 @@ namespace RimMind.Dialogue.Tests
 
             ResponseJsonParser.TryParseResponseJson(json, true, ref replyText, ref thoughtTag, ref thoughtDesc, ref relationDelta);
 
-            Assert.Equal("这矿洞真冷……", replyText);
+            Assert.Equal("这矿洞真冷…�?, replyText);
             Assert.Equal("STRESSED", thoughtTag);
             Assert.Equal(0, relationDelta);
         }
@@ -70,7 +70,7 @@ namespace RimMind.Dialogue.Tests
 
             ResponseJsonParser.TryParseResponseJson(json, false, ref replyText, ref thoughtTag, ref thoughtDesc, ref relationDelta);
 
-            Assert.Equal("嗯。", replyText);
+            Assert.Equal("嗯�?, replyText);
             Assert.Null(thoughtTag);
             Assert.Null(thoughtDesc);
             Assert.Equal(0, relationDelta);
@@ -90,7 +90,7 @@ namespace RimMind.Dialogue.Tests
 
             Assert.Equal("早啊，有什么事吗？", replyText);
             Assert.Equal("NONE", thoughtTag);
-            Assert.Equal("平淡问候", thoughtDesc);
+            Assert.Equal("平淡问�?, thoughtDesc);
             Assert.Equal(0, relationDelta);
         }
 
@@ -137,7 +137,7 @@ namespace RimMind.Dialogue.Tests
 
             ResponseJsonParser.TryParseResponseJson(json, false, ref replyText, ref thoughtTag, ref thoughtDesc, ref relationDelta);
 
-            Assert.Equal("滚开！", replyText);
+            Assert.Equal("滚开�?, replyText);
             Assert.Equal("IRRITATED", thoughtTag);
             Assert.Equal(-3, relationDelta);
         }

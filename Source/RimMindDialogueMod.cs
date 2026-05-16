@@ -105,7 +105,7 @@ namespace RimMind.Dialogue
                     subKeys.Add(isMonologue ? "ExampleMonologue" : "ExampleDialogue");
                     subKeys.Add(isMonologue ? "OutputMonologue" : "OutputDialogue");
                     if (!isMonologue) subKeys.Add("RelationDelta");
-                    return new List<ContextEntry> { new ContextEntry(TaskInstructionBuilder.Build("RimMind.Dialogue.Prompt.TaskInstruction", subKeys.ToArray())) };
+                    return new List<ContextEntry> { new ContextEntry(TaskInstructionBuilder.Build("RimMind.Dialogue.Prompt.TaskInstruction", null, subKeys.ToArray())) };
                 }, "RimMind.Dialogue");
 
             ContextKeyRegistry.Register("player_dialogue_task", ContextLayer.L0_Static, 0.95f,
@@ -114,7 +114,7 @@ namespace RimMind.Dialogue
                     var pawn = pawnObj as Pawn; if (pawn == null) return new List<ContextEntry>();
                     if (ContextKeyRegistry.CurrentScenario != ScenarioIds.Dialogue) return new List<ContextEntry>();
                     if (string.IsNullOrEmpty(ContextKeyRegistry.CurrentSpeakerName)) return new List<ContextEntry>();
-                    return new List<ContextEntry> { new ContextEntry(TaskInstructionBuilder.Build("RimMind.Dialogue.Prompt.PlayerTaskInstruction",
+                    return new List<ContextEntry> { new ContextEntry(TaskInstructionBuilder.Build("RimMind.Dialogue.Prompt.PlayerTaskInstruction", null,
                         "Role", "Goal", "Process", "Constraint", "Example", "Output", "Fallback", "InitiatorConstraint")) };
                 }, "RimMind.Dialogue");
         }
