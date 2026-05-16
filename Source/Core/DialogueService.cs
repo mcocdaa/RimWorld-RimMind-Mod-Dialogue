@@ -1,9 +1,10 @@
 using System;
-using RimMind.Contracts.Npc;
-using RimMind.Contracts.Result;
-using RimMind.Core;
-using RimMind.Kernel.Context;
-using RimMind.Contracts.Context;
+using RimMind.Application.Common.Interfaces.Npc;
+using RimMind.Application.Common.Models.Context;
+using RimMind.Domain.ValueObjects;
+using RimMind.Presentation;
+using RimMind.Application.Features.Context;
+using RimMind.Application.Common.Interfaces.Context;
 using RimMind.Dialogue.Settings;
 using Verse;
 

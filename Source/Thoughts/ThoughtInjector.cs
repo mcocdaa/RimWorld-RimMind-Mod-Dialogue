@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using RimMind.Contracts.Result;
+using RimMind.Domain.ValueObjects;
 using RimWorld;
 using UnityEngine;
 using Verse;

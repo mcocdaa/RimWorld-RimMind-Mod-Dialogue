@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using RimMind.Contracts.Result;
+using RimMind.Domain.ValueObjects;
 using RimMind.Dialogue.Core;
 using RimWorld;
 using UnityEngine;

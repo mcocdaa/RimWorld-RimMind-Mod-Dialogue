@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using HarmonyLib;
-using RimMind.Core;
+using RimMind.Presentation;
 using RimMind.Dialogue.Core;
 using RimMind.Dialogue.Settings;
 using RimWorld;

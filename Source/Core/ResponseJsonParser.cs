@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using RimMind.Contracts.Result;
+using RimMind.Domain.ValueObjects;
 using Verse;
 
 namespace RimMind.Dialogue.Core

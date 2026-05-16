@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Newtonsoft.Json;
-using RimMind.Contracts.Npc;
-using RimMind.Contracts.Result;
+using RimMind.Application.Common.Interfaces.Npc;
+using RimMind.Application.Common.Models.Npc;
+using RimMind.Domain.ValueObjects;
 using RimMind.Dialogue.Settings;
 using RimWorld;
 using UnityEngine;
@@ -64,7 +65,7 @@ namespace RimMind.Dialogue.Core
             try
             {
                 string summary = replyText.Length > 80 ? replyText.Substring(0, 80) + "..." : replyText;
-                RimMind.Core.RimMindAPI.PublishPerception(pawn.thingIDNumber, "dialogue_completed", summary, 0.4f);
+                RimMind.Presentation.RimMindAPI.PublishPerception(pawn.thingIDNumber, "dialogue_completed", summary, 0.4f);
             }
             catch (Exception ex) { RimMindErrors.Warn($"[RimMind] PublishPerception dialogue_completed failed: {ex.Message}"); }
 
