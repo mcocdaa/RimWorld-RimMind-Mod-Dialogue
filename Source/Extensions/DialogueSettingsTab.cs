@@ -1,6 +1,6 @@
 using UnityEngine;
 using Verse;
-using RimMind.Presentation.Settings;
+using RimMind.Application.Common.Interfaces.Extension;
 using RimMind.Dialogue.Settings;
 
 namespace RimMind.Dialogue
